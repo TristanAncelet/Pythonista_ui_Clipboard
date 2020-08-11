@@ -1,4 +1,5 @@
-Qimport ui,gestures
+import ui
+import gestures
 
 __all__ = ['Clip_View']
 def is_url(clip):
@@ -64,9 +65,10 @@ class Clip_View(ui.View):
 		self.browser_button.hidden = True
 		
 	def update(self):
-		if self.clip_button.title not self.clip:
+		if self.clip_button.title is not self.clip:
 			self.clip_button.title = self.clip 
-		else
+		else:
+			pass
 		
 	def open_in_browser(self,button):
 		'''

@@ -1,4 +1,4 @@
-__all__ = ['get_clips','save_clip','save_clips','load_file','save_sources','delete_clip_file','create_file']
+__all__ = ['get_clips','save_clip','save_clips','delete_clip_file','create_clip_file','get_clip_filenames']
 
 def delete_clip_file(filename):
 	import os
@@ -7,7 +7,7 @@ def delete_clip_file(filename):
 	file_path = os.path.join(cwd, file_dir, filename)
 	os.remove(file_path)
 
-def create_file(filename, dir = 'files'):
+def create_clip_file(filename, dir = 'files'):
 	import os
 	import json
 	file_path = os.path.join(dir,filename)
@@ -30,7 +30,7 @@ def get_clips(filename):
 			file.close()
 		return clips
 	except:
-		create_file(filename)
+		create_clip_file(filename)
 		clips = get_clips(filename)
 
 def save_clips(filename,clips):
@@ -44,39 +44,6 @@ def save_clips(filename,clips):
 		json.dump(clips,file)
 		file.close()
 
-def load_file(filename,dir = 'files',json = True):
-	import os
-	import json
-	
-	if json is True and '.json' not in filename:
-		filename = filename + '.json'
-	else:
-		pass
-		
-	cwd = os.getcwd()
-	file_path = os.path.join(cwd,dir,filename)
-	with open(file_path, 'r', encoding = 'utf-8') as file:
-		sources = json.load(file)
-		file.close()
-	return sources
-
-def save_sources(sources,filename = 'sources.json',dir = 'files',json = True):
-	import os
-	import json
-	
-	if json is True and '.json' not in filename:
-		filename = filename + '.json'
-	else:
-		pass
-		
-	cwd = os.getcwd()
-	file_path = os.path.join(cwd,dir,filename)
-	with open(file_path, 'w', encoding = 'utf-8') as file:
-		sources = json.dump(sources,file)
-		file.close()
-	return sources
-	
-	
 def save_clip(filename,clip):
 	clips = get_clips(filename)
 	if clip in clips:
@@ -84,3 +51,14 @@ def save_clip(filename,clip):
 	else:
 		clips.append(clip)
 	save_clips(filename,clips)
+	
+def get_clip_filenames():
+	import os
+	current_dir = os.getcwd()
+	path = os.path.join(current_dir, 'files')
+	file_list = os.listdir(path)
+	
+	if len(file_list) == 0:
+		create_clip_file('default.json')
+		file_list = get_clip_filenames()
+	return file_list

@@ -11,7 +11,7 @@ def horiz(parent_view = None, ref_view = None, auto_sizing = True, view_list = l
 	if auto_sizing == True:
 		import math
 		view_width = math.floor((parent_view.width/views_on_screen) - (h_gap*views_on_screen))
-		view_height = parent_view.height - 2 * gap
+		view_height = parent_view.height - 2 * v_gap
 	else:
 		view_width, view_height = dim
 	

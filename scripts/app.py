@@ -15,10 +15,10 @@ def make_source_button(App, function, source):
 	import keyboard
 	button = ui.Button()
 	button.background_color = '#c7c7c7'
-	button.title = source
+	button.title = source.replace('.json','')
 	button.border_width = 1
 	button.corner_radius = 4
-	button.source_file = source+'.json'
+	button.source_file = source
 	button.source = source
 	button.action = function
 	if not keyboard.is_keyboard():
@@ -40,9 +40,6 @@ class App(object):
 		self.clip_buttons = list()
 		self.sources = list()
 		self.source_buttons = list()
-		#when you open the app this is the
-		#default source
-		self.source = 'clips.json'
 		
 	def check_pasteboard(self):
 		import clipboard
@@ -59,7 +56,7 @@ class App(object):
 		import dialogs
 		button = data.view
 		if data.began:
-			button.bg_color = 
+			button.bg_color = 'blue'
 		if data.ended:
 			button = data.view
 			source_name = button.source_file
@@ -90,8 +87,8 @@ class App(object):
 		self.save_clips()
 		self.clipboard.scrollview.remove_subview(clip_button)
 		self.clipboard.layout()
-	def load_sources_file(self):
-		self.sources = load_file('sources.json')
+	def load_sources(self):
+		self.sources = get_clip_filenames()
 	
 	def make_source_buttons(self):
 		for source in self.sources:
@@ -123,7 +120,7 @@ class App(object):
 	def load_clips(self):
 		#this is a function from file_functions.py that 
 		#opens the source file and reads the clips within the file and returns the list
-		self.clips = get_clips(self.source)
+		self.clips = get_clips(self.sources[0])
 		
 	def make_clip_buttons(self):
 		#implemented in case this is used to make new buttons when switching to
@@ -161,10 +158,10 @@ class App(object):
 		self.clipboard.set_items()
 		
 	def initialize(self):
+		self.load_sources()
 		self.load_menu_bar()
 		self.load_clipboard_view()
 		self.load_clips()
-		self.load_sources_file()
 		self.make_source_buttons()
 		self.make_clip_buttons()
 		self.set_clipboard()

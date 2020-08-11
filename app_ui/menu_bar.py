@@ -6,10 +6,7 @@ __all__ = ['Menu_Bar']
 class Menu_Bar(ui.View):
 	def __init__(self,App):
 		self.App = App
-		self.has_buttons = False
-		#self.border_width = 1
 		self.background_color = '#626262'
-		
 		
 		self.save_button = save_button = ui.Button()
 		save_button.image = ui.Image.named('iow:ios7_download_outline_32')
@@ -37,10 +34,12 @@ class Menu_Bar(ui.View):
 		filename = '%s.json'%button.title
 		#print(filename)
 		self.App.set_clipboard_source(filename)
+		
 	def save_clips(self,button):
 		import clipboard
 		clip = clipboard.get()
 		self.App.save_clip(clip)
+		
 	def layout(self):
 		save_button = self.save_button
 		save_button.height = self.height
