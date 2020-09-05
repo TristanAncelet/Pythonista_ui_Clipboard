@@ -1,6 +1,6 @@
 import ui
-from app_ui import *
-from scripts import *
+import app_ui
+import scripts
 import gestures
  
 __all__ = ['App']
@@ -18,7 +18,6 @@ def make_source_button(App, function, source):
 	button.title = source.replace('.json','')
 	button.border_width = 1
 	button.corner_radius = 4
-	button.source_file = source
 	button.source = source
 	button.action = function
 	if not keyboard.is_keyboard():
@@ -36,37 +35,21 @@ class App(object):
 		#these are the lists that are used to
 		#store both strings and ui.Buttons that are
 		#used in the app
-		self.clips = list()
-		self.clip_buttons = list()
-		self.sources = list()
 		self.source_buttons = list()
 		
-	def check_pasteboard(self):
-		import clipboard
-		#this method checks the string currently stored
-		#on the IOs pasteboard and saves it in the general
-		#clips category if it isn't already
-		clip = clipboard.get()
-		if clip in self.clips:
-			pass
-		else:
-			self.clips.append(clip)
-			self.save_clips()
 	def delete_source(self, data):
 		import dialogs
 		button = data.view
 		if data.began:
 			button.bg_color = 'blue'
 		if data.ended:
-			button = data.view
 			source_name = button.source_file
-			prompt = dialogs.alert('Delete %s?'%source_name,'','Yes','No',hide_cancel_button=True)
+			prompt = dialogs.alert('Delete %s?'%source_name, '', 'Yes', 'No', hide_cancel_button = True)
 			if prompt == 1:
 				self.source_buttons.remove(button)
 				self.sources.remove(button.source)
-				save_sources(self.sources)
 				self.menu_bar.sbc.remove_subview(button)
-				delete_clip_file(source_name)
+				scripts.delete_clip_file(source_name)
 				self.menu_bar.layout()
 			else:
 				pass
@@ -74,27 +57,20 @@ class App(object):
 	def set_clipboard_source(self, button):
 		#this method sets the file whose content
 		#will be displayed on the clipboard ui
-		self.source = button.source_file
-		self.clipboard.reset_clipboard()
-		self.load_clips()
-		self.make_clip_buttons()
+		self.Clip_Data_Source.set_source(button.source)
 		self.set_clipboard()
 		
-	def delete_clip(self, clip_button):
+	def delete_clip(self, clip):
 		#this deletes the button associated with
 		#the clip as well as from the json source file
-		self.clips.remove(clip_button.clip)
+		self.clips.remove(clip)
 		self.save_clips()
-		self.clipboard.scrollview.remove_subview(clip_button)
-		self.clipboard.layout()
-	def load_sources(self):
-		self.sources = get_clip_filenames()
-	
+		
 	def make_source_buttons(self):
-		for source in self.sources:
+		source = self.Clip_Data_Source
+		for source in source.sources:
 			button = make_source_button(self, self.set_clipboard_source, source)
 			self.source_buttons.append(button)
-			
 			
 		import keyboard
 		if keyboard.is_keyboard():
@@ -111,66 +87,46 @@ class App(object):
 		import dialogs
 		prompt = dialogs.input_alert('Add new source', 'New Source file Name?','','Add Source')
 		self.sources.append(prompt)
-		save_sources(self.sources)
+		
 		button = make_source_button(self,self.set_clipboard_source,prompt)
-		create_file('%s.json'%(prompt))
+		scripts.create_clip_file('%s.json'%(prompt))
 		self.menu_bar.sbc.add_subview(button)
 		self.source_buttons.insert(-1,button)
 		self.menu_bar.layout()
-	def load_clips(self):
-		#this is a function from file_functions.py that 
-		#opens the source file and reads the clips within the file and returns the list
-		self.clips = get_clips(self.sources[0])
 		
-	def make_clip_buttons(self):
-		#implemented in case this is used to make new buttons when switching to
-		#a new source file
-		if len(self.clip_buttons) is not 0:
-			self.clip_buttons.clear()
-		else:
-			pass
-		#this iterates through the list of strings 
-		#and implements as a custom ui.View named Clip_View
-		for clip in self.clips:
-			clip_button = Clip_View(self, clip = clip)
-			
-			#not implemented yet but if you have a source file named links.json 
-			#you will be able to open them up in an internal web browser
-			if clip_button.clip_is_url():
-				clip_button.enable_browser_gesture()
-			self.clip_buttons.append(clip_button)
-			
 	def save_clips(self):
 		#saves the current clip list and any additions from the save button to the file
-		save_clips(self.source, self.clips)
+		scripts.save_clips(self.source, self.clips)
 		
 	def load_clipboard_view(self):
 		#loads the clipboard view and inserts itself into the view to allow 
 		#the view to access data from/call on the  App object
-		self.clipboard = ClipBoard(self)
+		self.clipboard = app_ui.ClipBoard(self)
 		
 	def load_menu_bar(self):
 		#same as above
-		self.menu_bar = Menu_Bar(self)
+		self.menu_bar = app_ui.Menu_Bar(self)
 		
 	def set_clipboard(self):
 		#sets the items that will be displayed on the Clipboard ui
 		self.clipboard.set_items()
 		
+
+	def load_data_source(self):
+		self.Clip_Data_Source = scripts.Clip_Data_Source(self)
+		
 	def initialize(self):
-		self.load_sources()
+		self.load_data_source()
 		self.load_menu_bar()
 		self.load_clipboard_view()
-		self.load_clips()
 		self.make_source_buttons()
-		self.make_clip_buttons()
 		self.set_clipboard()
 		
 	def save_clip(self,clip):
 		self.clips.append(clip)
-		self.make_clip_buttons()
-		save_clip(self.source, clip)
-		self.set_clipboard()
+		self.clipboard.clip_table.insert_rows([len(self.clips)-1])
+		scripts.save_clip(self.source, clip)
+		
 		
 	def run(self):
 		import appex

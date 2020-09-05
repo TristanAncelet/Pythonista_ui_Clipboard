@@ -20,7 +20,7 @@ class Menu_Bar(ui.View):
 		self.add_subview(source_buttons_container)
 		#self.corner_radius = 4
 		#self.background_color = 'white'
-		save_button.action = self.save_clips
+		save_button.action = self.App.Clip_Data_Source.save_clip
 		self.add_subview(save_button)
 		
 	def set_menu(self):
@@ -33,12 +33,7 @@ class Menu_Bar(ui.View):
 	def set_clips(self,button):
 		filename = '%s.json'%button.title
 		#print(filename)
-		self.App.set_clipboard_source(filename)
-		
-	def save_clips(self,button):
-		import clipboard
-		clip = clipboard.get()
-		self.App.save_clip(clip)
+		self.App.Clip_Data_Source.set_clipboard_source(filename)
 		
 	def layout(self):
 		save_button = self.save_button
